@@ -1,9 +1,9 @@
-package routes
+package route
 
 import (
 	"os"
 
-	"github.com/biggaji/ggsays/handlers"
+	"github.com/biggaji/ggsays/handler"
 	jwtware "github.com/gofiber/contrib/jwt"
 	"github.com/gofiber/fiber/v2"
 )
@@ -15,7 +15,7 @@ func SetupPostRoutes(app *fiber.App) {
 		SigningKey: jwtware.SigningKey{Key: []byte(os.Getenv("JWT_SECRET_KEY"))},
 	}))
 
-	postRoute.Post("/", handlers.HandleCreateNewPost)
-	postRoute.Get("/:id", handlers.HandleGetPostById)
-	postRoute.Get("/", handlers.HandleGetPosts)
+	postRoute.Post("/", handler.HandleCreateNewPost)
+	postRoute.Get("/:id", handler.HandleGetPostById)
+	postRoute.Get("/", handler.HandleGetPosts)
 }

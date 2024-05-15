@@ -5,7 +5,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/biggaji/ggsays/models"
+	"github.com/biggaji/ggsays/model"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -37,7 +37,7 @@ func Connect() {
 	db.Logger.LogMode(logger.Error)
 	log.Println("Running migrations")
 
-	db.AutoMigrate(&models.User{}, &models.Post{})
+	db.AutoMigrate(&model.User{}, &model.Post{})
 
 	// Assigns the database client
 	Client = DbClient{db}
