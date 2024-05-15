@@ -1,26 +1,26 @@
-package helpers
+package helper
 
 import (
 	"errors"
 	"os"
 	"time"
 
-	"github.com/biggaji/ggsays/dtos"
-	"github.com/biggaji/ggsays/models"
+	"github.com/biggaji/ggsays/dto"
+	"github.com/biggaji/ggsays/model"
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 )
 
-func CreateUserResponse(userModel models.User) dtos.User {
-	return dtos.User{ID: userModel.ID, FirstName: userModel.FirstName, LastName: userModel.LastName, Email: userModel.Email, UserName: userModel.UserName, Password: userModel.Password}
+func CreateUserResponse(userModel model.User) dto.User {
+	return dto.User{ID: userModel.ID, FirstName: userModel.FirstName, LastName: userModel.LastName, Email: userModel.Email, UserName: userModel.UserName, Password: userModel.Password}
 }
 
 func CreateErrorResponse(c *fiber.Ctx, message string, status int) error {
 	return c.Status(status).JSON(fiber.Map{"error": errors.New(message).Error()})
 }
 
-func GenerateAccessToken(payload dtos.UserJwtPayload) (string, error) {
+func GenerateAccessToken(payload dto.UserJwtPayload) (string, error) {
 	jwtToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"sub": payload.ID,
 		"exp": time.Now().Add(time.Hour * 1).Unix(),
@@ -29,14 +29,14 @@ func GenerateAccessToken(payload dtos.UserJwtPayload) (string, error) {
 	accessToken, err := jwtToken.SignedString([]byte(os.Getenv("JWT_SECRET_KEY")))
 
 	if err != nil {
-		return "", errors.New("failed to generate access token")
+		return "", ErrCantGenerateAccessToken
 	}
 
 	return accessToken, nil
 }
 
-func CreatePostResponse(postModel models.Post, includeUser bool) dtos.Post {
-	post := dtos.Post{
+func CreatePostResponse(postModel model.Post, includeUser bool) dto.Post {
+	post := dto.Post{
 		ID:        postModel.ID,
 		LikeCount: postModel.LikeCount,
 		Content:   postModel.Content,
@@ -52,11 +52,11 @@ func CreatePostResponse(postModel models.Post, includeUser bool) dtos.Post {
 	return post
 }
 
-func CreatePostsResponse(postModel []models.Post, includeUser bool) []dtos.Post {
-	var posts []dtos.Post
+func CreatePostsResponse(postModel []model.Post, includeUser bool) []dto.Post {
+	var posts []dto.Post
 
 	for _, post := range postModel {
-		data := dtos.Post{
+		data := dto.Post{
 			ID:        post.ID,
 			LikeCount: post.LikeCount,
 			Content:   post.Content,
@@ -77,6 +77,14 @@ func CreatePostsResponse(postModel []models.Post, includeUser bool) []dtos.Post 
 func ExtractUserIdFromJwtClaims(c *fiber.Ctx) (uuid.UUID, error) {
 	user := c.Locals("user").(*jwt.Token)
 	claims := user.Claims.(jwt.MapClaims)
+
+	// Handle type assertion failures
+	// The single return value form of a type assertion will panic on an incorrect type. Therefore, always use the "comma ok" idiom.
+
+	// t, ok := i.(string)
+	// if !ok {
+	//   // handle the error gracefully
+	// }
 
 	userId, ok := claims["sub"].(string)
 	if !ok {

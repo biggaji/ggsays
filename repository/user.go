@@ -5,11 +5,11 @@ import (
 	"fmt"
 
 	"github.com/biggaji/ggsays/database"
-	"github.com/biggaji/ggsays/models"
+	"github.com/biggaji/ggsays/model"
 	"gorm.io/gorm"
 )
 
-func InsertUserRecord(user models.User) error {
+func InsertUserRecord(user model.User) error {
 	result := database.Client.Create(&user)
 	if result.Error != nil {
 		return result.Error
@@ -17,8 +17,8 @@ func InsertUserRecord(user models.User) error {
 	return nil
 }
 
-func GetUserById(id uint) (models.User, error) {
-	var user models.User
+func GetUserById(id uint) (model.User, error) {
+	var user model.User
 	result := database.Client.Take(&user, "id = ?", id)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
@@ -30,33 +30,33 @@ func GetUserById(id uint) (models.User, error) {
 }
 
 func UserRecordExist(identifier string) bool {
-	var user models.User
+	var user model.User
 	result := database.Client.First(&user, "email = ? OR user_name = ?", identifier, identifier)
 	return !errors.Is(result.Error, gorm.ErrRecordNotFound)
 }
 
-func GetUserByEmail(email string) (models.User, error) {
-	var user models.User
+func GetUserByEmail(email string) (model.User, error) {
+	var user model.User
 	result := database.Client.Take(&user, "email = ?", email)
 
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-			return models.User{}, fmt.Errorf("user with email %s not found", email)
+			return model.User{}, fmt.Errorf("user with email %s not found", email)
 		}
-		return models.User{}, fmt.Errorf("failed to get user by email: %v", result.Error)
+		return model.User{}, fmt.Errorf("failed to get user by email: %v", result.Error)
 	}
 
 	return user, nil
 }
 
-func GetUserByUsername(userName string) (models.User, error) {
-	var user models.User
+func GetUserByUsername(userName string) (model.User, error) {
+	var user model.User
 	result := database.Client.Take(&user, "user_name = ?", userName)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-			return models.User{}, fmt.Errorf("user with username %s not found", userName)
+			return model.User{}, fmt.Errorf("user with username %s not found", userName)
 		}
-		return models.User{}, fmt.Errorf("failed to get user by username %v", userName)
+		return model.User{}, fmt.Errorf("failed to get user by username %v", userName)
 	}
 
 	return user, nil

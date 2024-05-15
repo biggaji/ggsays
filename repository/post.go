@@ -4,12 +4,13 @@ import (
 	"errors"
 
 	"github.com/biggaji/ggsays/database"
-	"github.com/biggaji/ggsays/models"
+	"github.com/biggaji/ggsays/helper"
+	"github.com/biggaji/ggsays/model"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
-func InsertNewPostRecord(post models.Post) error {
+func InsertNewPostRecord(post model.Post) error {
 	result := database.Client.Create(&post)
 	if result.Error != nil {
 		return result.Error
@@ -17,8 +18,8 @@ func InsertNewPostRecord(post models.Post) error {
 	return nil
 }
 
-func GetPostById(postId uuid.UUID, includeUser bool) (models.Post, error) {
-	var post models.Post
+func GetPostById(postId uuid.UUID, includeUser bool) (model.Post, error) {
+	var post model.Post
 
 	db := database.Client.Model(&post).Where("id = ?", postId)
 	if includeUser {
@@ -27,7 +28,7 @@ func GetPostById(postId uuid.UUID, includeUser bool) (models.Post, error) {
 
 	if err := db.Take(&post).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return post, errors.New("post not found")
+			return post, helper.ErrPostNotFound
 		}
 		return post, err
 	}
@@ -35,8 +36,8 @@ func GetPostById(postId uuid.UUID, includeUser bool) (models.Post, error) {
 	return post, nil
 }
 
-func GetAllPosts(includeUser bool) []models.Post {
-	var posts []models.Post
+func GetAllPosts(includeUser bool) []model.Post {
+	var posts []model.Post
 
 	query := database.Client.Model(&posts)
 
@@ -50,7 +51,7 @@ func GetAllPosts(includeUser bool) []models.Post {
 }
 
 func PostContentExistForUser(userId uuid.UUID, content string) bool {
-	var post models.Post
+	var post model.Post
 	result := database.Client.Where("user_id = ?", userId).Where("LOWER(content) = LOWER(?)", content).First(&post)
 	return !errors.Is(result.Error, gorm.ErrRecordNotFound)
 }
@@ -64,5 +65,7 @@ func PurgePosts() error {
 }
 
 func UpvotePost() error {
+	// var post model.Post
+
 	return nil
 }
