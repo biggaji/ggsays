@@ -6,7 +6,7 @@ import (
 	"os"
 
 	"github.com/biggaji/ggsays/database"
-	"github.com/biggaji/ggsays/route"
+	"github.com/biggaji/ggsays/router"
 	"github.com/gofiber/fiber/v2"
 	"github.com/joho/godotenv"
 )
@@ -22,8 +22,8 @@ func main() {
 
 	database.Connect()
 
-	route.SetupUserRoutes(app)
-	route.SetupPostRoutes(app)
+	router.SetupUserRoutes(app)
+	router.SetupPostRoutes(app)
 
 	port := os.Getenv("PORT")
 
@@ -31,5 +31,5 @@ func main() {
 		port = "3001"
 	}
 
-	app.Listen(fmt.Sprintf(":%v", port))
+	log.Fatal(app.Listen(fmt.Sprintf(":%v", port)))
 }

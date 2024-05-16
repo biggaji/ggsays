@@ -1,4 +1,4 @@
-package route
+package router
 
 import (
 	"github.com/biggaji/ggsays/handler"
